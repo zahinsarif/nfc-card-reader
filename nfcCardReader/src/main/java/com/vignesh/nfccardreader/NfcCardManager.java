@@ -33,7 +33,7 @@ public class NfcCardManager {
             pendingIntent = PendingIntent.getActivity(
                 activity, 0,
                 new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                PendingIntent.FLAG_MUTABLE
+                PendingIntent.FLAG_IMMUTABLE
             );
         } else {
             pendingIntent = PendingIntent.getActivity(

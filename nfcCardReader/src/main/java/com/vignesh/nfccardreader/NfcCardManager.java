@@ -8,35 +8,51 @@ import android.nfc.NfcAdapter;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.NfcA;
 import android.nfc.tech.NfcB;
+import android.os.Build;
 
 public class NfcCardManager {
 
-  private final NfcAdapter nfcAdapter;
-  private final PendingIntent pendingIntent;
-  private final Activity activity;
+    private final NfcAdapter nfcAdapter;
+    private final PendingIntent pendingIntent;
+    private final Activity activity;
 
-  private static final IntentFilter[] INTENT_FILTER = new IntentFilter[] {
-      new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-      new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)};
-  private static final String[][] TECH_LIST = new String[][] { {
-      NfcA.class.getName(), NfcB.class.getName(), IsoDep.class.getName() } };
+    private static final IntentFilter[] INTENT_FILTER = new IntentFilter[]{
+        new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
+        new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+    };
 
-  public NfcCardManager(final Activity activity) {
-    this.activity = activity;
-    nfcAdapter = NfcAdapter.getDefaultAdapter(activity);
-    pendingIntent = PendingIntent.getActivity(activity, 0,
-        new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_MUTABLE);
-  }
+    private static final String[][] TECH_LIST = new String[][]{
+        {NfcA.class.getName(), NfcB.class.getName(), IsoDep.class.getName()}
+    };
 
-  public void disableDispatch() {
-    if (nfcAdapter != null) {
-      nfcAdapter.disableForegroundDispatch(activity);
+    public NfcCardManager(final Activity activity) {
+        this.activity = activity;
+        nfcAdapter = NfcAdapter.getDefaultAdapter(activity);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntent = PendingIntent.getActivity(
+                activity, 0,
+                new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_MUTABLE
+            );
+        } else {
+            pendingIntent = PendingIntent.getActivity(
+                activity, 0,
+                new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_UPDATE_CURRENT
+            );
+        }
     }
-  }
 
-  public void enableDispatch() {
-    if (nfcAdapter != null) {
-      nfcAdapter.enableForegroundDispatch(activity, pendingIntent, INTENT_FILTER, TECH_LIST);
+    public void disableDispatch() {
+        if (nfcAdapter != null) {
+            nfcAdapter.disableForegroundDispatch(activity);
+        }
     }
-  }
+
+    public void enableDispatch() {
+        if (nfcAdapter != null) {
+            nfcAdapter.enableForegroundDispatch(activity, pendingIntent, INTENT_FILTER, TECH_LIST);
+        }
+    }
 }
